@@ -80,6 +80,12 @@ src/ia_vigilance_feux Pipeline ML et API
 tests/                Tests unitaires du coeur metier
 ```
 
+## Demarrage Vercel
+
+Le deploiement Vercel affiche directement le tableau de bord departemental. Par defaut, `DEMO_MODE=true` fournit 101 departements et 8 horizons avec des valeurs deterministes clairement marquees comme demonstration. Cela permet de tester l'interface sans inventer une alerte officielle.
+
+Pour passer en production, importer des donnees reelles, entrainer le modele, generer `data/predictions/latest.csv`, puis definir `DEMO_MODE=false` dans les variables d'environnement Vercel.
+
 ## Etat actuel
 
-Ce premier commit initialise le socle technique et les garde-fous anti-fuite. Les connecteurs Meteo-France/CDS sont volontairement stricts : ils exigent des cles et/ou exports reels avant ingestion.
+Le socle technique, le tableau de bord et le mode demonstration sont prets. Les connecteurs Meteo-France/CDS restent volontairement stricts : ils exigent des cles et/ou exports reels avant ingestion.
