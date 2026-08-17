@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IA Vigilance Feux</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root { color-scheme: light; font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif; }
+    body { margin: 0; background: #f6f7f2; color: #1d2520; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; background: #ffffff; border-bottom: 1px solid #dde3d8; }
+    h1 { margin: 0; font-size: 18px; font-weight: 700; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    button { border: 1px solid #c7d1c2; background: #fff; border-radius: 6px; padding: 8px 10px; cursor: pointer; }
+    button.active { background: #1f6f50; color: white; border-color: #1f6f50; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; height: calc(100vh - 62px); }
+    #map { min-height: 420px; }
+    aside { border-left: 1px solid #dde3d8; background: #fff; padding: 16px; overflow: auto; }
+    .notice { color: #657064; font-size: 14px; line-height: 1.45; }
+    .metric { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #edf0ea; }
+    @media (max-width: 820px) { main { grid-template-columns: 1fr; grid-template-rows: 60vh auto; } aside { border-left: 0; border-top: 1px solid #dde3d8; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>IA Vigilance Feux</h1>
+    <div class="toolbar" id="horizons"></div>
+  </header>
+  <main>
+    <div id="map"></div>
+    <aside id="details">
+      <strong>Prediction IA</strong>
+      <p class="notice">Les resultats affiches par cette interface sont des predictions du modele, pas une vigilance officielle Meteo-France.</p>
+    </aside>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const apiBase = window.API_BASE || 'http://127.0.0.1:8000';
+    const colors = {0: '#6bbf59', 1: '#ffd447', 2: '#f28c28', 3: '#d93b30'};
+    const labels = {0: 'Vert', 1: 'Jaune', 2: 'Orange', 3: 'Rouge'};
+    let selectedHorizon = 0;
+    let forecasts = [];
+    const map = L.map('map').setView([46.7, 2.4], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+
+    function buildToolbar() {
+      const holder = document.getElementById('horizons');
+      for (let horizon = 0; horizon <= 7; horizon++) {
+        const button = document.createElement('button');
+        button.textContent = horizon === 0 ? 'J0' : `J+${horizon}`;
+        button.onclick = () => { selectedHorizon = horizon; buildToolbar(); renderList(); };
+        if (horizon === selectedHorizon) button.classList.add('active');
+        holder.appendChild(button);
+      }
+    }
+
+    async function loadForecasts() {
+      try {
+        const response = await fetch(`${apiBase}/forecast`);
+        if (!response.ok) throw new Error(await response.text());
+        forecasts = await response.json();
+        renderList();
+      } catch (error) {
+        document.getElementById('details').innerHTML = `<strong>Aucune prediction disponible</strong><p class="notice">Lancez l'API apres ingestion de donnees reelles et generation de data/predictions/latest.csv.</p>`;
+      }
+    }
+
+    function renderList() {
+      const rows = forecasts.filter(item => Number(item.horizon) === selectedHorizon);
+      const html = rows.slice(0, 101).map(item => `
+        <div class="metric">
+          <span>${item.department_code}</span>
+          <strong style="color:${colors[item.level]}">${labels[item.level]} - ${Number(item.score).toFixed(0)}/100</strong>
+        </div>`).join('');
+      document.getElementById('details').innerHTML = `<strong>Horizon ${selectedHorizon === 0 ? 'J0' : `J+${selectedHorizon}`}</strong>${html || '<p class="notice">Pas encore de prediction pour cet horizon.</p>'}`;
+    }
+
+    buildToolbar();
+    loadForecasts();
+  </script>
+</body>
+</html>
