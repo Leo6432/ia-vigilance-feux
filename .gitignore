@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+.env
+data/raw/
+data/processed/
+data/predictions/
+data/backtests/
+data/model_registry/
+models/
+*.joblib
+.DS_Store
