@@ -46,6 +46,10 @@
     .notice { color: var(--muted); font-size: 14px; line-height: 1.45; }
     .metric { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #edf0ea; }
     .empty { background: #fff7e0; border: 1px solid #ead69a; border-radius: 8px; padding: 12px; margin-bottom: 14px; color: #594818; }
+    .demo-banner { background: #eaf2ff; border: 1px solid #b9cfee; border-radius: 8px; padding: 12px; margin-bottom: 14px; color: #25466f; line-height: 1.45; }
+    .demo-banner strong { color: #17375f; }
+    .topline { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 10px; }
+    .topline small { color: var(--muted); }
     @media (max-width: 860px) {
       header { align-items: flex-start; flex-direction: column; }
       .toolbar { justify-content: flex-start; }
@@ -65,7 +69,9 @@
   </header>
   <main>
     <section class="board">
+      <div id="demo-banner" class="demo-banner" hidden><strong>Mode demonstration actif.</strong> Les niveaux, scores et probabilites visibles permettent de tester l'interface, mais ils sont deterministes et fictifs. Pour une estimation operationnelle, entrainez le modele avec les donnees reelles de Meteo-France et BDIFF.</div>
       <div id="empty-state" class="empty" hidden>Aucune estimation IA n'est encore disponible. Il faut generer des predictions reelles dans <strong>data/predictions/latest.csv</strong>.</div>
+      <div class="topline"><strong>101 departements francais</strong><small id="data-status">Chargement des estimations...</small></div>
       <div class="summary" id="summary"></div>
       <div class="departments" id="departments"></div>
     </section>
@@ -82,6 +88,7 @@
     let selectedHorizon = 0;
     let forecasts = [];
     let departments = [];
+    let performance = null;
 
     function buildToolbar() {
       const holder = document.getElementById('horizons');
@@ -104,13 +111,22 @@
       } catch (error) {
         forecasts = [];
       }
+      try {
+        const performanceResponse = await fetch(`${apiBase}/model/performance`);
+        performance = performanceResponse.ok ? await performanceResponse.json() : null;
+      } catch (error) {
+        performance = null;
+      }
       render();
     }
 
     function render() {
       const rows = forecasts.filter(item => Number(item.horizon) === selectedHorizon);
       const byCode = new Map(rows.map(item => [String(item.department_code), item]));
+      const demo = rows.some(item => item.demo === true);
+      document.getElementById('demo-banner').hidden = !demo;
       document.getElementById('empty-state').hidden = rows.length > 0;
+      document.getElementById('data-status').textContent = rows.length ? `${rows.length} estimations pour cet horizon` : 'Aucune prediction disponible';
       renderSummary(rows);
       renderDepartments(byCode);
     }
