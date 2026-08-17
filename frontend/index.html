@@ -35,7 +35,7 @@
   </main>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const apiBase = window.API_BASE || 'http://127.0.0.1:8000';
+    const apiBase = window.API_BASE || window.location.origin;
     const colors = {0: '#6bbf59', 1: '#ffd447', 2: '#f28c28', 3: '#d93b30'};
     const labels = {0: 'Vert', 1: 'Jaune', 2: 'Orange', 3: 'Rouge'};
     let selectedHorizon = 0;
@@ -45,6 +45,7 @@
 
     function buildToolbar() {
       const holder = document.getElementById('horizons');
+      holder.innerHTML = '';
       for (let horizon = 0; horizon <= 7; horizon++) {
         const button = document.createElement('button');
         button.textContent = horizon === 0 ? 'J0' : `J+${horizon}`;
@@ -61,7 +62,7 @@
         forecasts = await response.json();
         renderList();
       } catch (error) {
-        document.getElementById('details').innerHTML = `<strong>Aucune prediction disponible</strong><p class="notice">Lancez l'API apres ingestion de donnees reelles et generation de data/predictions/latest.csv.</p>`;
+        document.getElementById('details').innerHTML = `<strong>Aucune prediction disponible</strong><p class="notice">L'interface est deployee. Il reste a generer data/predictions/latest.csv avec des donnees reelles pour afficher les niveaux par departement.</p>`;
       }
     }
 
