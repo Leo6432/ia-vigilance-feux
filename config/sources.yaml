@@ -1,0 +1,25 @@
+sources:
+  - name: meteo_france_vigilance
+    base_url: https://portail-api.meteofrance.fr/web/fr/api/DonneesPubliquesVigilance
+    license: Licence Ouverte / Open Licence 2.0 selon catalogue Meteo-France
+    requires_account: true
+  - name: meteo_france_observations
+    base_url: https://portail-api.meteofrance.fr/web/fr/api/DonneesPubliquesObservation
+    license: Licence Ouverte / Open Licence 2.0 selon catalogue Meteo-France
+    requires_account: true
+  - name: meteo_france_arome
+    base_url: https://portail-api.meteofrance.fr/web/fr/api/AROME
+    license: Licence Ouverte / Open Licence 2.0 selon catalogue Meteo-France
+    requires_account: true
+  - name: meteo_france_arpege
+    base_url: https://portail-api.meteofrance.fr/web/fr/api/ARPEGE
+    license: Licence Ouverte / Open Licence 2.0 selon catalogue Meteo-France
+    requires_account: true
+  - name: bdiff
+    base_url: https://bdiff.agriculture.gouv.fr
+    license: Conditions BDIFF/IGN a verifier pour l'export choisi
+    requires_account: true
+  - name: copernicus_cds
+    base_url: https://cds.climate.copernicus.eu/api
+    license: Licence propre a chaque dataset CDS, acceptation requise
+    requires_account: true
