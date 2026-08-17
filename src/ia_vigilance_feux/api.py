@@ -6,6 +6,7 @@ from typing import Any
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from ia_vigilance_feux.departments import DEPARTMENTS
@@ -16,6 +17,8 @@ app = FastAPI(
     description="API de predictions IA de vigilance feux de foret. Les resultats ne sont pas une vigilance officielle.",
 )
 
+ROOT_DIR = Path(__file__).resolve().parents[2]
+FRONTEND_INDEX = ROOT_DIR / "frontend" / "index.html"
 PREDICTIONS_FILE = Path("data/predictions/latest.csv")
 PERFORMANCE_FILE = Path("data/model_registry/current_metrics.json")
 
@@ -28,6 +31,18 @@ class TrainingRequest(BaseModel):
 
 
 TRAINING_STATUS: dict[str, Any] = {"state": "idle", "message": "Aucun entrainement lance"}
+
+
+@app.get("/", include_in_schema=False)
+def root() -> FileResponse:
+    if not FRONTEND_INDEX.exists():
+        raise HTTPException(status_code=404, detail="Interface frontend introuvable")
+    return FileResponse(FRONTEND_INDEX)
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 @app.get("/departments")
